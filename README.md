@@ -12,17 +12,13 @@ However, these applications use different built-in tools to read and process fil
 
 ## Quickstart
 
-Create a virtual environment and install uv:
+Install uv:
+
 ```bash
-python3 -m venv venv
-source .venv/bin/activate
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Install the package:
-```bash
-uv pip install mcpdoc
-```
+Please see [official uv docs](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) for other ways to install `uv`.
 
 Select an `llms.txt` file to use. For example, here's the LangGraph `llms.txt` 
 ```bash
@@ -30,6 +26,7 @@ https://langchain-ai.github.io/langgraph/llms.txt
 ```
 
 Run the MCP server locally with whatever `llms.txt` file you want to use:
+
 ```bash
 uvx --from mcpdoc mcpdoc \
     --urls LangGraph:https://langchain-ai.github.io/langgraph/llms.txt \
@@ -71,7 +68,7 @@ These will be updated with our server specification, as shown below.
 {
   "mcpServers": {
     "langgraph-docs-mcp": {
-      "command": "/Users/rlm/.local/bin/uvx",
+      "command": "uvx",
       "args": [
         "--from",
         "mcpdoc",
