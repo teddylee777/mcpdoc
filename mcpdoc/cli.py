@@ -8,7 +8,7 @@ from typing import List, Dict
 
 import yaml
 
-from mcp_llms_txt.main import create_server, DocSource
+from mcpdoc.main import create_server, DocSource
 
 
 def parse_args() -> argparse.Namespace:
