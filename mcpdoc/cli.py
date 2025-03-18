@@ -9,6 +9,7 @@ from typing import List, Dict
 import yaml
 
 from mcpdoc.main import create_server, DocSource
+from mcpdoc.splash import SPLASH
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,7 +46,7 @@ def parse_args() -> argparse.Namespace:
         "--transport",
         type=str,
         default="stdio",
-        choices=["stdio", "http", "websocket"],
+        choices=["stdio", "sse"],
         help="Transport protocol for MCP server",
     )
 
@@ -130,6 +131,10 @@ def main() -> None:
         follow_redirects=args.follow_redirects,
         timeout=args.timeout,
     )
+
+    print()
+    print(SPLASH)
+    print()
 
     print(
         f"Starting MCP LLMS-TXT server with {len(doc_sources)} doc sources",
