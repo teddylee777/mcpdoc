@@ -42,7 +42,15 @@ def create_server(
     settings: dict | None = None,
 ) -> FastMCP:
     """Create the server and generate tools."""
-    server = FastMCP(name="llms-txt", **settings)
+    server = FastMCP(
+        name="llms-txt",
+        instructions=(
+            "Use the list doc sources tool to see available documentation "
+            "sources. Once you have a source, use fetch docs to get the "
+            "documentation"
+        ),
+        **settings,
+    )
     httpx_client = httpx.AsyncClient(follow_redirects=follow_redirects, timeout=timeout)
 
     @server.tool()

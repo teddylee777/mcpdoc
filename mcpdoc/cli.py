@@ -84,6 +84,17 @@ def parse_args() -> argparse.Namespace:
         help="Transport protocol for MCP server",
     )
 
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default="INFO",
+        help=(
+            "Log level for the server. Use one on the following: DEBUG, INFO, "
+            "WARNING, ERROR."
+            " (only used with --transport sse)"
+        ),
+    )
+
     # SSE-specific options
     parser.add_argument(
         "--host",
@@ -188,6 +199,7 @@ def main() -> None:
     settings = {
         "host": args.host,
         "port": args.port,
+        "log_level": "INFO",
     }
 
     # Create and run the server
