@@ -39,9 +39,10 @@ def create_server(
     *,
     follow_redirects: bool = False,
     timeout: float = 10,
+    settings: dict | None = None,
 ) -> FastMCP:
     """Create the server and generate tools."""
-    server = FastMCP(name="llms-txt")
+    server = FastMCP(name="llms-txt", **settings)
     httpx_client = httpx.AsyncClient(follow_redirects=follow_redirects, timeout=timeout)
 
     @server.tool()
