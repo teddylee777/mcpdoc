@@ -8,6 +8,7 @@ from typing import List, Dict
 
 import yaml
 
+from mcpdoc._version import __version__
 from mcpdoc.main import create_server, DocSource
 from mcpdoc.splash import SPLASH
 
@@ -98,6 +99,15 @@ def parse_args() -> argparse.Namespace:
         help="Port to bind the server to (only used with --transport sse)",
     )
 
+    # Version information
+    parser.add_argument(
+        "--version",
+        "-V",
+        action="version",
+        version=f"mcpdoc {__version__}",
+        help="Show version information and exit",
+    )
+
     return parser.parse_args()
 
 
@@ -140,6 +150,8 @@ def create_doc_sources_from_urls(urls: List[str]) -> List[DocSource]:
     """
     doc_sources = []
     for entry in urls:
+        if not entry.strip():
+            continue
         if ":" in entry and not entry.startswith(("http:", "https:")):
             # Format is name:url
             name, url = entry.split(":", 1)
@@ -156,11 +168,20 @@ def main() -> None:
     if len(sys.argv) == 1:
         # No arguments, print help
         # Use the same custom formatter as parse_args()
-        argparse.ArgumentParser(
+        help_parser = argparse.ArgumentParser(
             description="MCP LLMS-TXT Documentation Server",
             formatter_class=CustomFormatter,
             epilog=EPILOG,
-        ).print_help()
+        )
+        # Add version to help parser too
+        help_parser.add_argument(
+            "--version",
+            "-V",
+            action="version",
+            version=f"mcpdoc {__version__}",
+            help="Show version information and exit",
+        )
+        help_parser.print_help()
         sys.exit(0)
 
     args = parse_args()
@@ -197,7 +218,6 @@ def main() -> None:
         timeout=args.timeout,
         settings=settings,
     )
-
     print()
     print(SPLASH)
     print()
