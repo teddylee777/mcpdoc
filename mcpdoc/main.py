@@ -1,11 +1,11 @@
 """MCP Llms-txt server for docs."""
 
-from typing import TypedDict, List, NotRequired
 from urllib.parse import urlparse
 
 import httpx
 from markdownify import markdownify
 from mcp.server.fastmcp import FastMCP
+from typing_extensions import NotRequired, TypedDict
 
 
 class DocSource(TypedDict):
@@ -35,7 +35,7 @@ def extract_domain(url: str) -> str:
 
 
 def create_server(
-    doc_source: List[DocSource],
+    doc_source: list[DocSource],
     *,
     follow_redirects: bool = False,
     timeout: float = 10,
