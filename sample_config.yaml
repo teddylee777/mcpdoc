@@ -1,0 +1,4 @@
+# Sample configuration for mcp-llms-txt server
+# Each entry must have a llms_txt URL and optionally a name
+- name: LangGraph Python
+  llms_txt: https://langchain-ai.github.io/langgraph/llms.txt
