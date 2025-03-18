@@ -230,14 +230,15 @@ def main() -> None:
         timeout=args.timeout,
         settings=settings,
     )
-    print()
-    print(SPLASH)
-    print()
 
-    print(
-        f"Launching MCPDOC server with {len(doc_sources)} doc sources",
-        file=sys.stderr,
-    )
+    if args.transport == "sse":
+        print()
+        print(SPLASH)
+        print()
+
+        print(
+            f"Launching MCPDOC server with {len(doc_sources)} doc sources",
+        )
 
     # Pass transport-specific options
     server.run(transport=args.transport)
