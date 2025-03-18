@@ -9,13 +9,48 @@ from typing import List, Dict
 import yaml
 
 from mcpdoc.main import create_server, DocSource
+from mcpdoc.splash import SPLASH
+
+
+class CustomFormatter(
+    argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter
+):
+    # Custom formatter to preserve epilog formatting while showing default values
+    pass
+
+
+EPILOG = """
+Examples:
+  # Directly specifying llms.txt URLs with optional names
+  mcpdoc --urls LangGraph:https://langchain-ai.github.io/langgraph/llms.txt
+  
+  # Using a YAML config file
+  mcpdoc --yaml sample_config.yaml
+
+  # Using a JSON config file
+  mcpdoc --json sample_config.json
+
+  # Combining multiple documentation sources
+  mcpdoc --yaml sample_config.yaml --json sample_config.json --urls LangGraph:https://langchain-ai.github.io/langgraph/llms.txt
+
+  # Using SSE transport with default host (127.0.0.1) and port (8000)
+  mcpdoc --yaml sample_config.yaml --transport sse
+  
+  # Using SSE transport with custom host and port
+  mcpdoc --yaml sample_config.yaml --transport sse --host 0.0.0.0 --port 9000
+  
+  # Using SSE transport with additional HTTP options
+  mcpdoc --yaml sample_config.yaml --follow-redirects --timeout 15 --transport sse --host localhost --port 8080
+"""
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
+    # Custom formatter to preserve epilog formatting
     parser = argparse.ArgumentParser(
         description="MCP LLMS-TXT Documentation Server",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=CustomFormatter,
+        epilog=EPILOG,
     )
 
     # Allow combining multiple doc source methods
@@ -45,8 +80,22 @@ def parse_args() -> argparse.Namespace:
         "--transport",
         type=str,
         default="stdio",
-        choices=["stdio", "http", "websocket"],
+        choices=["stdio", "sse"],
         help="Transport protocol for MCP server",
+    )
+
+    # SSE-specific options
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        help="Host to bind the server to (only used with --transport sse)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to bind the server to (only used with --transport sse)",
     )
 
     return parser.parse_args()
@@ -103,6 +152,17 @@ def create_doc_sources_from_urls(urls: List[str]) -> List[DocSource]:
 
 def main() -> None:
     """Main entry point for the CLI."""
+    # Check if any arguments were provided
+    if len(sys.argv) == 1:
+        # No arguments, print help
+        # Use the same custom formatter as parse_args()
+        argparse.ArgumentParser(
+            description="MCP LLMS-TXT Documentation Server",
+            formatter_class=CustomFormatter,
+            epilog=EPILOG,
+        ).print_help()
+        sys.exit(0)
+
     args = parse_args()
 
     # Load doc sources based on command-line arguments
@@ -124,17 +184,30 @@ def main() -> None:
     if args.urls:
         doc_sources.extend(create_doc_sources_from_urls(args.urls))
 
+    # Only used with SSE transport
+    settings = {
+        "host": args.host,
+        "port": args.port,
+    }
+
     # Create and run the server
     server = create_server(
         doc_sources,
         follow_redirects=args.follow_redirects,
         timeout=args.timeout,
+        settings=settings,
     )
 
+    print()
+    print(SPLASH)
+    print()
+
     print(
-        f"Starting MCP LLMS-TXT server with {len(doc_sources)} doc sources",
+        f"Launching MCPDOC server with {len(doc_sources)} doc sources",
         file=sys.stderr,
     )
+
+    # Pass transport-specific options
     server.run(transport=args.transport)
 
 
