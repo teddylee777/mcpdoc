@@ -5,7 +5,7 @@ A Model Control Protocol (MCP) server for serving documentation from llms.txt fi
 ## Installation
 
 ```bash
-pip install mcp-mcpdoc
+pip install mcpdoc
 ```
 
 ## Usage
