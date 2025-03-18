@@ -33,14 +33,14 @@ uvx --from mcpdoc mcpdoc \
 
 * This should run at: http://localhost:8082
 
-< add photo >
+![Screenshot 2025-03-18 at 3 29 30 PM](https://github.com/user-attachments/assets/24a3d483-cd7a-4c7e-a4f7-893df70e888f)
 
 Run [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector) and connect to the running server:
 ```bash
 npx @modelcontextprotocol/inspector
 ```
 
-< add photo >
+![Screenshot 2025-03-18 at 3 30 30 PM](https://github.com/user-attachments/assets/14645d57-1b52-4a5e-abfe-8e7756772704)
 
 Here, you can test the `tool` calls. 
 
