@@ -19,7 +19,9 @@ The MCP LLMS-TXT Documentation Server is a specialized Model Control Protocol (M
 
 3. Add the mcp server to Cursor. Remember to put the URL as **[host]/sse** for example **http://localhost:8081/sse**.
 
-4. You should be able to use it within composer now.
+Cursor needs to be in **agent** mode for this to work.
+
+5. You should be able to use it within composer now.
 
 ### Claude Code
 
