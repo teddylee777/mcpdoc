@@ -1,6 +1,6 @@
 [project]
 name = "mcpdoc"
-version = "0.0.2"
+version = "0.0.3"
 description = "Server llms-txt documentation over MCP"
 readme = "README.md"
 requires-python = ">=3.10"
