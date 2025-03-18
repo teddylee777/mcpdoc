@@ -10,6 +10,28 @@ pip install mcpdoc
 
 ## Usage
 
+### Claude Code
+
+1. Install uv
+
+2. Add a command to claude that instructs it on how to launch the MCP Server
+
+```shell
+claude mcp add-json langgraph-docs  '{"type":"stdio","command":"uvx" ,"args":["--from", "mcpdoc", "mcpdoc", "--urls", "langgraph:https://langchain-ai.github.io/langgraph/llms.txt"]}' -s user
+```
+
+3. Launch claude code
+
+```shell
+claude code
+```
+
+You can check the status of the mcp serer with `/mcp` command inside of claude
+
+
+4. Test it out! (For example, "how can i use interrupt in langgraph?")
+
+
 ### Command-line Interface
 
 The `mcpdoc` command provides a simple CLI for launching the documentation server. You can specify documentation sources in three ways, and these can be combined:
