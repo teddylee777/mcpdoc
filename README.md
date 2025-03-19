@@ -6,7 +6,7 @@
 
 [MCP](https://github.com/modelcontextprotocol) offers a way for developers to have *full control* over tools used by these applications. Here, we create [an open source MCP server](https://github.com/modelcontextprotocol) to provide MCP host applications (e.g., Cursor, Windsurf, Claude Code/Desktop) with (1) a user-defined list of `llms.txt` files and (2) a simple  `fetch_docs` tool read URLs within any of the provided `llms.txt` files. This allows the user to audit each tool call as well as the context returned. 
 
-![Screenshot 2025-03-18 at 12 55 51 PM](https://github.com/user-attachments/assets/a7440c71-6cbc-472e-9243-3bfc371bb173)
+![mcpdoc](https://github.com/user-attachments/assets/736f8f55-833d-4200-b833-5fca01a09e1b)
 
 ## Quickstart
 
@@ -46,8 +46,10 @@ npx @modelcontextprotocol/inspector
 
 * Open `Cursor Settings` and `MCP` tab.
 * This will open the `~/.cursor/mcp.json` file.
-* Paste the following into the file. 
-* We use the `langgraph-docs-mcp` name and link to the LangGraph `llms.txt` file below.
+
+![Screenshot 2025-03-19 at 11 01 31 AM](https://github.com/user-attachments/assets/3d1c8eb3-4d40-487f-8bad-3f9e660f770a)
+
+* Paste the following into the file (we use the `langgraph-docs-mcp` name and link to the LangGraph `llms.txt`).
 
 ```
 {
@@ -98,6 +100,9 @@ what are types of memory in LangGraph?
 * Open Cascade with `CMD+L` (on Mac).
 * Click `Configure MCP` to open the config file, `~/.codeium/windsurf/mcp_config.json`.
 * Update with `langgraph-docs-mcp` as noted above.
+
+![Screenshot 2025-03-19 at 11 02 52 AM](https://github.com/user-attachments/assets/d45b427c-1c1e-4602-820a-7161a310af24)
+
 * `CMD+L` (on Mac) to open Cascade and refresh MCP servers.
 * Available MCP servers will be listed, showing `langgraph-docs-mcp` as connected.
 
