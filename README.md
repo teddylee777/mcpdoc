@@ -81,7 +81,7 @@ npx @modelcontextprotocol/inspector
 Then, try an example prompt, such as:
 ```
 use the langgraph-docs-mcp server to answer any LangGraph questions -- 
-+ call get_docs tool to get the available llms.txt file
++ call list_doc_sources tool to get the available llms.txt file
 + call fetch_docs tool to read it
 + reflect on the urls in llms.txt 
 + reflect on the input question 
@@ -130,7 +130,7 @@ Then, try the example prompt:
 
 * In a terminal after installing [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), run this command to add the MCP server to your project:
 ```
-claude mcp add-json langgraph-docs '{"type":"stdio","command":"uvx" ,"args":["--from", "mcpdoc", "mcpdoc", "--urls", "langgraph:https://langchain-ai.github.io/langgraph/llms.txt"]}' -s project
+claude mcp add-json langgraph-docs '{"type":"stdio","command":"uvx" ,"args":["--from", "mcpdoc", "mcpdoc", "--urls", "langgraph:https://langchain-ai.github.io/langgraph/llms.txt"]}' -s local
 ```
 * You will see `~/.claude.json` updated.
 * Test by launching Claude Code and running to view your tools:
