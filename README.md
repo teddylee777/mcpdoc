@@ -2,27 +2,25 @@
 
 ## Overview
 
-[llms.txt](https://llmstxt.org/) is an index of website contents for LLMs. As an example, [LangGraph's llms.txt](https://langchain-ai.github.io/langgraph/llms.txt) provides a list of LangGraph doc URLs with descriptions. An LLM can use this file to decide which docs to read when accomplishing tasks, which pairs well with IDE agents like Cursor and Windsurf or apps like Claude Code/Desktop.
+[llms.txt](https://llmstxt.org/) is a website index for LLMs, providing background information, guidance, and links to detailed markdown files. IDEs like Cursor and Windsurf or apps like Claude Code/Desktop can use `llms.txt` to retrieve context for tasks. However, these apps use different built-in tools to read and process files like `llms.txt`. The retrieval process can be opaque, and there is not always a way to audit the tool calls or the context returned.
 
-However, these apps use different built-in tools to read and process files like `llms.txt`; sometimes IDEs will reflect on the `llms.txt` file and use it for formulate *web search queries* rather than just retrieving the URLs listed! More broadly, there can be poor visibility into what apps are doing with their built-in retrieval / search tools.
-
-[MCP](https://github.com/modelcontextprotocol) offers a way for developers to define tools that give *full control* over how context is retrieved and displayed to LLMs in these apps. Here, we create [a simple MCP server](https://github.com/modelcontextprotocol) that defines a few **tools** that these apps can use, such as a `list_doc_sources` to load any `llms.txt` you provide and a `fetch_docs` tool read any URLs within `llms.txt`. This simple MCP server has two benefits: (1) it allows the user to customize context retrieval and (2) it allows the user to audit each tool call as well as the context returned. 
+[MCP](https://github.com/modelcontextprotocol) offers a way for developers to have *full control* over tools used by these applications. Here, we create [an open source MCP server](https://github.com/modelcontextprotocol) to provide MCP host applications (e.g., Cursor, Windsurf, Claude Code/Desktop) with (1) a user-defined list of `llms.txt` files and (2) a simple  `fetch_docs` tool read URLs within any of the provided `llms.txt` files. This allows the user to audit each tool call as well as the context returned. 
 
 ![Screenshot 2025-03-18 at 12 55 51 PM](https://github.com/user-attachments/assets/a7440c71-6cbc-472e-9243-3bfc371bb173)
 
 ## Quickstart
 
-Install uv:
+#### Install uv
 * Please see [official uv docs](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) for other ways to install `uv`.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Select an `llms.txt` file to use. 
+#### Choose an `llms.txt` file to use. 
 * For example, [here's](https://langchain-ai.github.io/langgraph/llms.txt) the LangGraph `llms.txt` file.
 
-Run the MCP server locally with your `llms.txt` file of choice:
+#### (Optional) Test the MCP server locally with your `llms.txt` file of choice:
 ```bash
 uvx --from mcpdoc mcpdoc \
     --urls LangGraph:https://langchain-ai.github.io/langgraph/llms.txt \
@@ -35,36 +33,21 @@ uvx --from mcpdoc mcpdoc \
 
 ![Screenshot 2025-03-18 at 3 29 30 PM](https://github.com/user-attachments/assets/24a3d483-cd7a-4c7e-a4f7-893df70e888f)
 
-Run [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector) and connect to the running server:
+* Run [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector) and connect to the running server:
 ```bash
 npx @modelcontextprotocol/inspector
 ```
 
 ![Screenshot 2025-03-18 at 3 30 30 PM](https://github.com/user-attachments/assets/14645d57-1b52-4a5e-abfe-8e7756772704)
 
-Here, you can test the `tool` calls. 
+* Here, you can test the `tool` calls. 
 
-Finally, add the server to any MCP host applications of interest.
+#### Connect to Cursor 
 
-Below, we walk through each one, but here are the the config files that are updated for each:
-
-```
-*Cursor*
-`~/.cursor/mcp.json` 
-
-*Windsurf*
-`~/.codeium/windsurf/mcp_config.json`
- 
-*Claude Desktop*
-`~/Library/Application\ Support/Claude/claude_desktop_config.json`
- 
-*Claude Code*
-`~/.claude.json`
-```
-
-These will be updated with our server, as shown below.
-
-> NOTE: It appears that `stdio` transport is required for Windsurf and Cursor.
+* Open `Cursor Settings` and `MCP` tab.
+* This will open the `~/.cursor/mcp.json` file.
+* Paste the following into the file. 
+* We use the `langgraph-docs-mcp` name and link to the LangGraph `llms.txt` file below.
 
 ```
 {
@@ -89,20 +72,13 @@ These will be updated with our server, as shown below.
 }
 ```
 
-## Usage
-
-### Cursor 
-
-Setup:
-* `Settings -> MCP` to add a server.
-* Update `~/.cursor/mcp.json` with `langgraph-docs-mcp` as noted above.
-* `Settings -> MCP` to confirm that the server is connected.
-* `Control-L` to open chat.
+* Confirm that the server is running in your `Cursor Settings/MCP` tab.
+* `CMD+L` (on Mac) to open chat.
 * Ensure `agent` is selected. 
 
 ![Screenshot 2025-03-18 at 1 56 54 PM](https://github.com/user-attachments/assets/0dd747d0-7ec0-43d2-b6ef-cdcf5a2a30bf)
 
-Then, try an example prompt:
+Then, try an example prompt, such as:
 ```
 use the langgraph-docs-mcp server to answer any LangGraph questions -- 
 + call get_docs tool to get the available llms.txt file
@@ -115,18 +91,14 @@ use the langgraph-docs-mcp server to answer any LangGraph questions --
 what are types of memory in LangGraph?
 ```
 
-* It will ask to approve tool calls as it processes your question.
-
 ![Screenshot 2025-03-18 at 1 58 38 PM](https://github.com/user-attachments/assets/180966b5-ab03-4b78-8b5d-bab43f5954ed)
 
-* Consider adding some of these instructions to [Cursor Rules](https://docs.cursor.com/context/rules-for-ai).
+### Connect to Windsurf
 
-### Windsurf
-
-Setup:
-* `Control-L` to open Cascade and click `Configure MCP` to open the config file.
-* Update `~/.codeium/windsurf/mcp_config.json` with `langgraph-docs-mcp` as noted above.
-* `Control-L` to open Cascade and refresh MCP servers.
+* Open Cascade with `CMD+L` (on Mac).
+* Click `Configure MCP` to open the config file, `~/.codeium/windsurf/mcp_config.json`.
+* Update with `langgraph-docs-mcp` as noted above.
+* `CMD+L` (on Mac) to open Cascade and refresh MCP servers.
 * Available MCP servers will be listed, showing `langgraph-docs-mcp` as connected.
 
 ![Screenshot 2025-03-18 at 2 02 12 PM](https://github.com/user-attachments/assets/5a29bd6a-ad9a-4c4a-a4d5-262c914c5276)
@@ -136,11 +108,11 @@ Then, try the example prompt:
 
 ![Screenshot 2025-03-18 at 2 03 07 PM](https://github.com/user-attachments/assets/0e24e1b2-dc94-4153-b4fa-495fd768125b)
 
-### Claude Desktop
+### Connect to Claude Desktop
 
-Setup:
-* Open `Settings -> Developer` to update `~/Library/Application\ Support/Claude/claude_desktop_config.json`.
-* Restart Claude.
+* Open `Settings/Developer` to update `~/Library/Application\ Support/Claude/claude_desktop_config.json`.
+* Update with `langgraph-docs-mcp` as noted above.
+* Restart Claude Desktop app.
 
 ![Screenshot 2025-03-18 at 2 05 54 PM](https://github.com/user-attachments/assets/228d96b6-8fb3-4385-8399-3e42fa08b128)
 
@@ -154,10 +126,9 @@ Then, try the example prompt:
 
 ![Screenshot 2025-03-18 at 2 06 54 PM](https://github.com/user-attachments/assets/59b3a010-94fa-4a4d-b650-5cd449afeec0)
 
-### Claude Code
+### Connect to Claude Code
 
-Setup:
-* In a terminal after installing [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), run to add the MCP server to your project:
+* In a terminal after installing [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), run this command to add the MCP server to your project:
 ```
 claude mcp add-json langgraph-docs '{"type":"stdio","command":"uvx" ,"args":["--from", "mcpdoc", "mcpdoc", "--urls", "langgraph:https://langchain-ai.github.io/langgraph/llms.txt"]}' -s project
 ```
@@ -178,31 +149,34 @@ Then, try the example prompt:
 
 ## Command-line Interface
 
-The `mcpdoc` command provides a simple CLI for launching the documentation server. You can specify documentation sources in three ways, and these can be combined:
+The `mcpdoc` command provides a simple CLI for launching the documentation server. 
+
+You can specify documentation sources in three ways, and these can be combined:
 
 1. Using a YAML config file:
+
+* This will load the LangGraph Python documentation from the `sample_config.yaml` file in this repo.
 
 ```bash
 mcpdoc --yaml sample_config.yaml
 ```
 
-This will load the LangGraph Python documentation from the sample_config.yaml file.
-
 2. Using a JSON config file:
+
+* This will load the LangGraph Python documentation from the `sample_config.json` file in this repo.
 
 ```bash
 mcpdoc --json sample_config.json
 ```
 
-This will load the LangGraph Python documentation from the sample_config.json file.
-
 3. Directly specifying llms.txt URLs with optional names:
 
-```bash
-mcpdoc --urls https://langchain-ai.github.io/langgraph/llms.txt LangGraph:https://langchain-ai.github.io/langgraph/llms.txt
-```
+* URLs can be specified either as plain URLs or with optional names using the format `name:url`.
+* This is how we loaded `llms.txt` for the MCP server above.
 
-URLs can be specified either as plain URLs or with optional names using the format `name:url`.
+```bash
+mcpdoc --urls LangGraph:https://langchain-ai.github.io/langgraph/llms.txt
+```
 
 You can also combine these methods to merge documentation sources:
 
@@ -225,7 +199,9 @@ This will load the LangGraph Python documentation with a 15-second timeout and f
 
 ## Configuration Format
 
-Both YAML and JSON configuration files should contain a list of documentation sources. Each source must include an `llms_txt` URL and can optionally include a `name`:
+Both YAML and JSON configuration files should contain a list of documentation sources. 
+
+Each source must include an `llms_txt` URL and can optionally include a `name`:
 
 ### YAML Configuration Example (sample_config.yaml)
 
