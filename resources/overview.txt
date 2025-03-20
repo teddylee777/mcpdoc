@@ -1,0 +1,136 @@
+# LangChain & LangGraph 개요
+
+## LangChain 소개
+LangChain은 대규모 언어 모델(LLM)을 활용한 애플리케이션 개발을 위한 프레임워크입니다. LangChain은 다음과 같은 핵심 구성 요소로 이루어져 있습니다:
+
+1. **프롬프트(Prompt)**: LLM에 전달할 명령어와 컨텍스트를 구성
+2. **출력 파서(Output Parsers)**: LLM의 출력을 구조화된 형식으로 변환
+3. **모델(Model)**: 다양한 LLM 모델과 통합 (OpenAI, Google, HuggingFace 등)
+4. **메모리(Memory)**: 대화 상태와 컨텍스트 유지 관리
+5. **문서 로더(Document Loader)**: 다양한 형식의 문서 데이터 로드
+6. **텍스트 분할(Text Splitter)**: 문서를 처리 가능한 크기로 분할
+7. **임베딩(Embedding)**: 텍스트를 벡터로 변환
+8. **벡터저장소(VectorStore)**: 임베딩 벡터 저장 및 검색
+9. **검색기(Retriever)**: 관련 정보 검색
+10. **LangChain Expression Language(LCEL)**: 컴포넌트 조합을 위한 인터페이스
+
+### LangChain의 주요 특징
+- **Runnable**: 모든 컴포넌트는 표준화된 인터페이스로 조합 가능
+- **RunnableWithMessageHistory**: 세션별 메시지 기록 관리 기능
+- **RAG(Retrieval Augmented Generation)**: 외부 데이터를 활용한 LLM 응답 생성
+
+## LangGraph 소개
+LangGraph는 LangChain을 기반으로 한 그래프 기반 에이전트 개발 프레임워크입니다. 복잡한 워크플로우와 다중 에이전트 시스템을 구축하는 데 특화되어 있습니다.
+
+### LangGraph의 주요 특징
+
+1. **그래프 기반 워크플로우**: 노드와 엣지로 구성된 그래프로 제어 흐름 정의
+2. **상태 관리**: 그래프 실행 중 상태 추적 및 관리
+3. **메모리 관리**: 대화 기록 및 장기 메모리 관리
+   - 대화 기록 관리
+   - 메시지 삭제
+   - 요약 대화 메모리
+   - 장기 메모리(cross-thread)
+   - 시맨틱 검색 기반 메모리
+4. **인간 개입(Human-in-the-loop)**: 사용자 입력 대기 및 도구 호출 검토
+5. **타임 트래블**: 과거 실행 단계로 돌아가 대안 경로 탐색
+6. **지속성**: 실행 상태 유지 및 복구 메커니즘
+7. **스트리밍**: 점진적 응답 출력으로 사용자 경험 향상
+8. **도구 호출**: 외부 도구와 API 통합
+9. **서브그래프**: 기존 그래프의 재사용 및 조합
+10. **멀티 에이전트 시스템**: 여러 에이전트 간 협업 구현
+
+## 주요 사용 사례
+
+### LangChain 사용 사례
+- 대화형 챗봇 개발
+- 문서 기반 질의응답 시스템
+- 데이터 분석 및 시각화
+- 텍스트 요약 및 분류
+- 코드 생성 및 분석
+
+### LangGraph 사용 사례
+- **챗봇**
+  - 고객 지원 시스템
+  - 정보 수집 챗봇
+  - 코드 어시스턴트
+
+- **RAG(Retrieval Augmented Generation)**
+  - 에이전트형 RAG
+  - 적응형 RAG
+  - 교정적 RAG(CRAG)
+  - 셀프 RAG
+  - SQL 에이전트
+
+- **멀티 에이전트 시스템**
+  - 협업 네트워크
+  - 감독자 기반 시스템
+  - 계층적 팀 구조
+
+## 시작하기
+
+### LangChain 시작하기
+```python
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+
+# 프롬프트 템플릿 생성
+prompt = ChatPromptTemplate.from_template("다음에 대해 설명해주세요: {topic}")
+
+# LLM 모델 설정
+model = ChatOpenAI(model="gpt-3.5-turbo")
+
+# 체인 생성 및 실행
+chain = prompt | model
+response = chain.invoke({"topic": "LangChain이란 무엇인가요?"})
+print(response.content)
+```
+
+### LangGraph 시작하기
+```python
+from typing import TypedDict, List, Annotated
+from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langgraph.graph import StateGraph, END
+
+# 상태 정의
+class ChatState(TypedDict):
+    messages: List[BaseMessage]
+
+# 노드 함수 정의
+def chat_node(state: ChatState) -> ChatState:
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "당신은 도움이 되는 AI 비서입니다."),
+        ("user", "{input}")
+    ])
+    model = ChatOpenAI(model="gpt-3.5-turbo")
+    chain = prompt | model
+    
+    # 가장 최근 사용자 메시지 추출
+    last_message = state["messages"][-1]
+    response = chain.invoke({"input": last_message.content})
+    
+    # 응답 추가
+    state["messages"].append(AIMessage(content=response.content))
+    return state
+
+# 그래프 생성
+workflow = StateGraph(ChatState)
+workflow.add_node("chat", chat_node)
+workflow.set_entry_point("chat")
+workflow.add_edge("chat", END)
+
+# 컴파일 및 실행
+graph = workflow.compile()
+result = graph.invoke({"messages": [HumanMessage(content="안녕하세요!")]})
+print(result["messages"][-1].content)
+```
+
+## 참고 자료
+- [LangChain 공식 문서](https://python.langchain.com/docs/)
+- [LangGraph 공식 문서](https://langchain-ai.github.io/langgraph/)
+- [LangChain Hub](https://smith.langchain.com/hub)
+- [LangSmith](https://smith.langchain.com/)
+- [LangChain 오픈 튜토리얼](https://langchain-opentutorial.gitbook.io/langchain-opentutorial/)
+- [랭체인 한국어 튜토리얼 코드저장소(GitHub)](https://github.com/teddylee777/langchain-kr) 
