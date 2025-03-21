@@ -25,7 +25,7 @@ async def get_docs(url: str = "overview") -> str:
         url: The URL to fetch or be "overview".
     """
     if url == "overview":
-        url = "https://langchain-ai.github.io/langgraph/llms.txt"
+        url = "https://raw.githubusercontent.com/teddylee777/mcpdoc/refs/heads/main/resources/overview.txt"
 
     # URL 제한 검사 제거함
     response = await HTTPX_CLIENT.get(url)

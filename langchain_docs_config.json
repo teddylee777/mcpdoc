@@ -1,0 +1,14 @@
+[
+  {
+    "name": "LangChain / LangGraph overview Python",
+    "llms_txt": "https://raw.githubusercontent.com/teddylee777/mcpdoc/refs/heads/main/resources/overview.txt"
+  },
+  {
+    "name": "LangGraph Python",
+    "llms_txt": "https://raw.githubusercontent.com/teddylee777/mcpdoc/refs/heads/main/resources/langgraph-wiki.txt"
+  },
+  {
+    "name": "LangChain Python",
+    "llms_txt": "https://raw.githubusercontent.com/teddylee777/mcpdoc/refs/heads/main/resources/langchain-wiki.txt"
+  }
+]
