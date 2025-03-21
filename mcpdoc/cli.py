@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-"""Command-line interface for mcp-llms-txt server."""
-
 import argparse
 import json
 import sys
 from typing import List, Dict
 
 import yaml
+import requests  # 추가: HTTP 요청을 위해 requests 모듈 사용
 
 from mcpdoc._version import __version__
 from mcpdoc.main import create_server, DocSource
@@ -47,19 +45,23 @@ Examples:
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
-    # Custom formatter to preserve epilog formatting
     parser = argparse.ArgumentParser(
         description="MCP LLMS-TXT Documentation Server",
         formatter_class=CustomFormatter,
         epilog=EPILOG,
     )
 
-    # Allow combining multiple doc source methods
     parser.add_argument(
-        "--yaml", "-y", type=str, help="Path to YAML config file with doc sources"
+        "--yaml",
+        "-y",
+        type=str,
+        help="Path or URL to YAML config file with doc sources",
     )
     parser.add_argument(
-        "--json", "-j", type=str, help="Path to JSON config file with doc sources"
+        "--json",
+        "-j",
+        type=str,
+        help="Path or URL to JSON config file with doc sources",
     )
     parser.add_argument(
         "--urls",
@@ -96,7 +98,6 @@ def parse_args() -> argparse.Namespace:
         ),
     )
 
-    # SSE-specific options
     parser.add_argument(
         "--host",
         type=str,
@@ -110,7 +111,6 @@ def parse_args() -> argparse.Namespace:
         help="Port to bind the server to (only used with --transport sse)",
     )
 
-    # Version information
     parser.add_argument(
         "--version",
         "-V",
@@ -123,29 +123,54 @@ def parse_args() -> argparse.Namespace:
 
 
 def load_config_file(file_path: str, file_format: str) -> List[Dict[str, str]]:
-    """Load configuration from a file.
+    """Load configuration from a file or URL.
 
     Args:
-        file_path: Path to the config file
-        file_format: Format of the config file ("yaml" or "json")
+        file_path: Local path or URL to the config file.
+        file_format: Format of the config file ("yaml" or "json").
 
     Returns:
-        List of doc source configurations
+        List of doc source configurations.
     """
+    print(f"[DEBUG] Loading config from URL: {file_path}")
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
+        print(f"[DEBUG] Loading config from URL: {file_path}")
+        # URL 감지를 위해 소문자로 변환한 문자열로 비교
+        if file_path.lower().startswith("http://") or file_path.lower().startswith(
+            "https://"
+        ):
+
+            import requests  # 필요한 경우 함수 내부에서 임포트
+
+            response = requests.get(file_path, timeout=10)
+            response.raise_for_status()
+            content = response.text
             if file_format.lower() == "yaml":
-                config = yaml.safe_load(file)
+                config = yaml.safe_load(content)
             elif file_format.lower() == "json":
-                config = json.load(file)
+                config = json.loads(content)
             else:
                 raise ValueError(f"Unsupported file format: {file_format}")
+        else:
+            with open(file_path, "r", encoding="utf-8") as file:
+                if file_format.lower() == "yaml":
+                    config = yaml.safe_load(file)
+                elif file_format.lower() == "json":
+                    config = json.load(file)
+                else:
+                    raise ValueError(f"Unsupported file format: {file_format}")
 
         if not isinstance(config, list):
             raise ValueError("Config file must contain a list of doc sources")
 
         return config
-    except (FileNotFoundError, yaml.YAMLError, json.JSONDecodeError) as e:
+    except (
+        FileNotFoundError,
+        yaml.YAMLError,
+        json.JSONDecodeError,
+        requests.RequestException,
+        ValueError,
+    ) as e:
         print(f"Error loading config file: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -154,10 +179,10 @@ def create_doc_sources_from_urls(urls: List[str]) -> List[DocSource]:
     """Create doc sources from a list of URLs with optional names.
 
     Args:
-        urls: List of llms.txt URLs with optional names (format: 'url' or 'name:url')
+        urls: List of llms.txt URLs with optional names (format: 'url' or 'name:url').
 
     Returns:
-        List of DocSource objects
+        List of DocSource objects.
     """
     doc_sources = []
     for entry in urls:
@@ -175,16 +200,13 @@ def create_doc_sources_from_urls(urls: List[str]) -> List[DocSource]:
 
 def main() -> None:
     """Main entry point for the CLI."""
-    # Check if any arguments were provided
+    print(f"Starting MCPDOC server with {len(sys.argv)} arguments")
     if len(sys.argv) == 1:
-        # No arguments, print help
-        # Use the same custom formatter as parse_args()
         help_parser = argparse.ArgumentParser(
             description="MCP LLMS-TXT Documentation Server",
             formatter_class=CustomFormatter,
             epilog=EPILOG,
         )
-        # Add version to help parser too
         help_parser.add_argument(
             "--version",
             "-V",
@@ -197,10 +219,8 @@ def main() -> None:
 
     args = parse_args()
 
-    # Load doc sources based on command-line arguments
     doc_sources: List[DocSource] = []
 
-    # Check if any source options were provided
     if not (args.yaml or args.json or args.urls):
         print(
             "Error: At least one source option (--yaml, --json, or --urls) is required",
@@ -208,7 +228,6 @@ def main() -> None:
         )
         sys.exit(1)
 
-    # Merge doc sources from all provided methods
     if args.yaml:
         doc_sources.extend(load_config_file(args.yaml, "yaml"))
     if args.json:
@@ -216,14 +235,12 @@ def main() -> None:
     if args.urls:
         doc_sources.extend(create_doc_sources_from_urls(args.urls))
 
-    # Only used with SSE transport
     settings = {
         "host": args.host,
         "port": args.port,
         "log_level": "INFO",
     }
 
-    # Create and run the server
     server = create_server(
         doc_sources,
         follow_redirects=args.follow_redirects,
@@ -240,7 +257,6 @@ def main() -> None:
             f"Launching MCPDOC server with {len(doc_sources)} doc sources",
         )
 
-    # Pass transport-specific options
     server.run(transport=args.transport)
 
 
