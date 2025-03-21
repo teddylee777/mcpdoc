@@ -6,3 +6,5 @@
   llms_txt: https://raw.githubusercontent.com/teddylee777/mcpdoc/refs/heads/main/resources/langchain-wiki.txt
 - name: LangGraph Python
   llms_txt: https://raw.githubusercontent.com/teddylee777/mcpdoc/refs/heads/main/resources/langgraph-wiki.txt
+- name: Wikidocs Python
+  llms_txt: https://wikidocs.net/book/14314
